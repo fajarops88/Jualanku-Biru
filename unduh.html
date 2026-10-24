@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unduh Produk — DigitazPro</title><meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="nav"><div class="container"><a href="index.html" class="brand"><i>D</i><span>DigitazPro</span></a></div></header>
+<main class="page-center" id="app"><div class="skel" style="height:240px"></div></main>
+<script src="js/config.js"></script><script src="js/api.js"></script>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search), app = document.getElementById('app');
+  API.get({ action: 'download', k: q.get('k') || '', e: q.get('e') || '', t: q.get('t') || '' }).then(function (r) {
+    if (!r.success) { app.innerHTML = '<div class="box" style="text-align:center"><div class="okmark" style="background:#FFE4E6;color:var(--red)"><span class="mi">error</span></div><h1 style="font-size:22px">Link tidak dapat dipakai</h1><p style="color:var(--muted)">' + U.esc(r.message) + '</p><a class="btn btn-primary" href="index.html">Ke beranda</a></div>'; return; }
+    const d = r.data;
+    app.innerHTML = '<div class="box" style="text-align:center"><div class="okmark"><span class="mi">download_done</span></div><h1 style="font-size:24px">Terima kasih, ' + U.esc(d.nama) + '!</h1><p style="color:var(--muted)">Produk Anda siap diunduh:<br><b>' + U.esc(d.produk) + '</b></p><a class="btn btn-primary btn-lg btn-block shine glow" href="' + U.esc(d.url) + '" rel="noopener"><span class="mi">download</span> Unduh Sekarang</a><p style="margin-top:14px"><a href="' + U.esc(d.lihat) + '" target="_blank" rel="noopener" style="color:var(--primary);font-weight:600">Buka di Google Drive</a></p><p style="font-size:12px;color:var(--muted)">Berlaku sampai ' + U.tgl(d.kedaluwarsa) + '</p></div>';
+  }).catch(function () { app.innerHTML = '<div class="empty">Gagal memuat. Periksa koneksi lalu muat ulang halaman.</div>'; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — DigitazPro</title><meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login">
+  <div class="login-card">
+    <div class="brand" style="justify-content:center"><i>D</i><span>DigitazPro</span></div>
+    <h1>Masuk Admin</h1><p class="sub">Kelola produk, pesanan, dan pelanggan Anda.</p>
+    <div id="gBtn" style="display:flex;justify-content:center;min-height:44px"></div>
+    <div id="gInfo" style="text-align:center;color:var(--muted);font-size:13px"></div>
+    <div class="sep">atau akses darurat</div>
+    <form id="fDarurat">
+      <div class="field"><label for="lU">Nama pengguna</label><input id="lU" autocomplete="username"></div>
+      <div class="field"><label for="lP">Kata sandi</label><input id="lP" type="password" autocomplete="current-password"></div>
+      <button class="btn btn-primary btn-block" id="lGo">Masuk</button>
+    </form>
+    <p style="text-align:center;margin:16px 0 0;font-size:13px"><a href="index.html" style="color:var(--primary)">← Ke halaman utama</a></p>
+  </div>
+</div>
+
+<!-- APLIKASI -->
+<div class="shell" id="shell" hidden>
+  <aside class="side" id="side">
+    <div class="brand"><i>D</i><span>DigitazPro</span></div>
+    <div id="menu"></div>
+    <div class="me"><b id="meNama">-</b><span id="meRole" style="opacity:.8"></span><br><a id="btnOut" style="padding:6px 0;color:#FCA5A5"><span class="mi" style="font-size:18px">logout</span> Keluar</a></div>
+  </aside>
+  <div class="main">
+    <div class="top"><button class="burger" id="burger" aria-label="Menu"><span class="mi">menu</span></button><h1 id="judul">Dashboard</h1><button class="btn btn-soft btn-sm" id="btnRefresh" title="Muat ulang data"><span class="mi" style="font-size:18px">refresh</span></button></div>
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><button class="x" id="drawerX" aria-label="Tutup"><span class="mi">close</span></button><div id="drawerBody"></div></aside>
+
+<script src="js/config.js"></script><script src="js/api.js"></script><script src="js/admin.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.__gsi && window.__gsi()"></script>
+</body>
+</html>

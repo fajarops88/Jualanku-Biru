@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konfirmasi Pesanan — DigitazPro</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="nav"><div class="container"><a href="index.html" class="brand"><i>D</i><span>DigitazPro</span></a><a href="index.html" class="btn btn-ghost" style="padding:8px 14px;min-height:38px;font-size:14px">Kembali</a></div></header>
+<main class="page-center" id="app"><div class="skel" style="height:320px"></div></main>
+<canvas id="butterfly" width="168" height="168" aria-hidden="true"></canvas>
+<script src="js/config.js"></script><script src="js/api.js"></script><script src="js/butterfly.js"></script>
+<script>
+(function () {
+  const $app = document.getElementById('app'), q = new URLSearchParams(location.search), esc = U.esc;
+  let data = null; try { data = JSON.parse(sessionStorage.getItem('dp_order') || 'null'); } catch (e) {}
+  const kode = q.get('k') || '';
+  if (data && kode && data.kode !== kode) data = null;
+
+  function salin(txt, el) { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { U.toast('Tersalin: ' + txt, 'ok'); }, function () { const t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); U.toast('Tersalin', 'ok'); } catch (e) {} t.remove(); }); }
+  window.salin = salin;
+
+  function bayarHtml(d) {
+    const mb = d.metodeBayar || {}; let h = '';
+    if (d.metode === 'Transfer Bank') {
+      h = (mb.bank || []).map(function (b) { return '<div class="copyrow"><div><small style="color:var(--muted)">' + esc(b.nama) + ' a.n. ' + esc(b.atasNama) + '</small><br><code>' + esc(b.nomor) + '</code></div><button onclick="salin(\'' + esc(b.nomor) + '\')">Salin</button></div>'; }).join('') || '<p>Hubungi CS untuk rekening pembayaran.</p>';
+    } else if (d.metode === 'QRIS') {
+      h = mb.qris ? '<img src="' + esc(mb.qris) + '" alt="QRIS" style="max-width:260px;margin:8px auto;border-radius:12px;border:1px solid var(--border)" referrerpolicy="no-referrer">' : '<p>QRIS belum tersedia, silakan pilih transfer atau hubungi CS.</p>';
+    } else {
+      h = (mb.ewallet || []).map(function (b) { return '<div class="copyrow"><div><small style="color:var(--muted)">' + esc(b.nama) + '</small><br><code>' + esc(b.nomor) + '</code></div><button onclick="salin(\'' + esc(b.nomor) + '\')">Salin</button></div>'; }).join('') || '<p>Hubungi CS.</p>';
+    }
+    return h;
+  }
+  function waLink(d) {
+    const tpl = 'Halo, saya {nama}. Saya sudah memesan *{produk}* ({kode}) senilai {jumlah}. Mohon dicek pembayaran saya.';
+    const msg = tpl.replace('{nama}', d.nama).replace('{produk}', d.produk).replace('{kode}', d.kode).replace('{jumlah}', U.rp(d.nominal));
+    return 'https://api.whatsapp.com/send?phone=' + d.waCs + '&text=' + encodeURIComponent(msg);
+  }
+  function tampil(d, status) {
+    const lunas = status === 'Lunas', batal = status === 'Batal';
+    $app.innerHTML =
+      '<div style="text-align:center;margin-bottom:22px"><div class="okmark"><span class="mi">' + (batal ? 'cancel' : 'check') + '</span></div><h1 style="font-size:28px;font-weight:800">' + (lunas ? 'Pembayaran Terverifikasi!' : batal ? 'Pesanan Dibatalkan' : 'Pesanan Berhasil Dibuat!') + '</h1><p style="color:var(--muted)">' + (lunas ? 'Link unduhan sudah dikirim ke WhatsApp &amp; email Anda.' : batal ? 'Hubungi CS bila ini keliru.' : 'Selesaikan pembayaran, lalu konfirmasi lewat WhatsApp.') + '</p></div>' +
+      '<div class="box"><div class="kv"><span>Kode pesanan</span><b>' + esc(d.kode) + ' <button style="border:0;background:none;color:var(--primary);font-weight:700" onclick="salin(\'' + esc(d.kode) + '\')">Salin</button></b></div><div class="kv"><span>Produk</span><b>' + esc(d.produk) + '</b></div><div class="kv"><span>Metode</span><b>' + esc(d.metode) + '</b></div><div class="kv"><span>Status</span><b>' + esc(status || 'Pending') + '</b></div><div class="kv"><span>Total bayar</span><b style="color:var(--primary);font-size:22px">' + U.rp(d.nominal) + '</b></div></div>' +
+      (!lunas && !batal ? '<div class="box"><b>Instruksi pembayaran</b>' + bayarHtml(d) + '<p style="font-size:13px;color:var(--muted);margin:12px 0 0">Transfer tepat sesuai total di atas agar mudah diverifikasi.</p></div><a class="btn btn-red btn-lg btn-block shine glow" target="_blank" rel="noopener" href="' + waLink(d) + '"><span class="mi">chat</span> Konfirmasi via WhatsApp</a><button class="btn btn-ghost btn-block" style="margin-top:10px" id="btnCek"><span class="mi">refresh</span> Cek status pembayaran</button>' : '') +
+      '<p style="text-align:center;margin-top:20px"><a href="index.html" style="color:var(--primary);font-weight:600">← Kembali ke beranda</a></p>';
+    const b = document.getElementById('btnCek');
+    if (b) b.onclick = function () { b.disabled = true; cek(d).then(function () { b.disabled = false; }); };
+  }
+  function cek(d) {
+    return API.post('order.get', { kode: d.kode, whatsapp: d.whatsapp }, { pub: true }).then(function (r) {
+      if (r.success) { tampil(Object.assign({}, d, r.data), r.data.status); if (r.data.status === 'Lunas') U.toast('Pembayaran sudah terverifikasi 🎉', 'ok'); else U.toast('Status: ' + r.data.status, 'info'); }
+      else U.toast(r.message, 'err');
+    }).catch(function () { U.toast('Koneksi bermasalah.', 'err'); });
+  }
+
+  function formCek() {
+    $app.innerHTML = '<div class="box"><h1 style="font-size:24px;margin-bottom:6px">Cek Status Pesanan</h1><p style="color:var(--muted);margin:0 0 16px">Masukkan kode pesanan dan nomor WhatsApp yang dipakai saat memesan.</p>' +
+      '<div class="field"><label>Kode pesanan</label><input id="cK" value="' + esc(kode) + '" placeholder="ORD-260101-0001"></div><div class="field"><label>Nomor WhatsApp</label><input id="cW" type="tel" inputmode="tel" placeholder="081234567890"></div><button class="btn btn-primary btn-block btn-lg" id="cGo">Cek Pesanan</button></div>';
+    document.getElementById('cGo').onclick = function () {
+      const k = document.getElementById('cK').value.trim(), w = document.getElementById('cW').value;
+      if (!k || !w) return U.toast('Isi kode dan nomor WhatsApp.', 'err');
+      API.post('order.get', { kode: k, whatsapp: w }, { pub: true }).then(function (r) { if (r.success) { r.data.whatsapp = w; tampil(r.data, r.data.status); } else U.toast(r.message, 'err'); });
+    };
+  }
+  if (data) { tampil(data, 'Pending'); cek(data); } else formCek();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+23.50.06	Peringatan	Eksekusi dimulai
+23.50.06	Info	🚀 Setup DigitazPro Landing v1.0.0 ...
+23.50.26	Info	🔐 AKSES DARURAT (catat sekarang — hanya tampil sekali, segera rotasi setelah login pertama)
+23.50.26	Info	   Nama pengguna : darurat
+23.50.26	Info	   Kata sandi    : ye3mEP9EahdEqu4f
+23.50.27	Info	✅ Trigger "tick" aktif (tiap 1 menit).
+23.50.27	Info	
+23.50.27	Info	✅ Setup selesai.
+23.50.27	Info	   Spreadsheet : https://docs.google.com/spreadsheets/d/17HrxaYAqZ8x9C2Gyske3f_p6uked0ExV9yc8qosVgXs/edit
+23.50.27	Info	   Folder Drive: https://drive.google.com/drive/folders/1_aZwR7OFhQZTw0XgC17woRjUfM-KUXIA
+23.50.27	Info	   Letakkan file produk di folder "File Produk Digital", lalu isi kolom FileDriveID di sheet Produk (atau lewat Admin → Produk).
+23.50.27	Info	   Langkah berikut: Deploy → New deployment → Web app (Execute as: Me, Access: Anyone) → salin URL /exec ke frontend/js/config.js
+23.50.27	Peringatan	Eksekusi selesai
